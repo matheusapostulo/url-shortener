@@ -59,18 +59,17 @@
 ## 7. Technologies
 > 01. Sql database (Mysql)
 > 02. Cache - Redis
-> 03. API Gateway - Kong
-> 04. Nginx server
-> 05. Nginx load balancer
-> 06. Nginx Rate limiter
-> 07. Message Broker - RabbitMQ
-> 08. Secret Manager - Keycloak
-> 09. Observability - Prometheus/Grafana
+> 03. Nginx server
+> 04. Nginx load balancer
+> 05. Nginx Rate limiter
+> 06. Message Broker - RabbitMQ
+> 07. Observability - Prometheus/Grafana
 
 
 ## 8. System Design
-
 #### High Level Design
+![url-shortener (5)](https://github.com/user-attachments/assets/d8af5e24-f5ca-4d3f-8346-325471ec63fd)
+
 #### Expiration Cache Policy 
 #### Load Balancer x App Load Balancer x API Gateway
 #### Mysql Master and Slaves instancies
