@@ -68,7 +68,7 @@
 
 ## 8. System Design
 #### High Level Design
-![url-shortener (5)](https://github.com/user-attachments/assets/d8af5e24-f5ca-4d3f-8346-325471ec63fd)
+![url-shortener](url-shortener.png)
 
 #### Expiration Cache Policy 
 #### Load Balancer x App Load Balancer x API Gateway
