@@ -5,10 +5,6 @@ import (
 	"github.com/matheusapostulo/url-shortener/internal/url/port"
 )
 
-const (
-	urlBase = "http://localhost:8080/"
-)
-
 type CreateURLInputDto struct {
 	LongURL string `json:"long_url"`
 }
