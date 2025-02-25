@@ -5,12 +5,16 @@ import (
 	"github.com/matheusapostulo/url-shortener/internal/url/port"
 )
 
+const (
+	urlBase = "http://localhost:8080/"
+)
+
 type CreateURLInputDto struct {
-	LongURL string
+	LongURL string `json:"long_url"`
 }
 
 type CreateURLOutputDto struct {
-	ShortURL string
+	ShortURL string `json:"short_url"`
 }
 
 func NewCreateURLUsecase(urlRp port.URLRepository, cacheRp port.CacheRepository, shortenerSv port.URLShortener) *CreateURLUsecase {
@@ -35,14 +39,11 @@ func (c *CreateURLUsecase) Execute(input CreateURLInputDto) (CreateURLOutputDto,
 		}, nil
 	}
 
-	url, err := c.urlRepository.FindByLongURL(input.LongURL)
+	url, _ = c.urlRepository.FindByLongURL(input.LongURL)
 	if !url.IsEmpty() {
 		return CreateURLOutputDto{
 			ShortURL: url.ShortURL,
 		}, nil
-	}
-	if err != nil {
-		return CreateURLOutputDto{}, err
 	}
 
 	newAvailableUrlID, err := c.urlRepository.GetNewAvailableID()
@@ -56,6 +57,11 @@ func (c *CreateURLUsecase) Execute(input CreateURLInputDto) (CreateURLOutputDto,
 	}
 
 	url, err = domain.NewURL(newAvailableUrlID, input.LongURL, shortURL)
+	if err != nil {
+		return CreateURLOutputDto{}, err
+	}
+
+	err = c.urlRepository.Save(url)
 	if err != nil {
 		return CreateURLOutputDto{}, err
 	}
