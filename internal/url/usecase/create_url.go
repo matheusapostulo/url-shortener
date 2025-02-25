@@ -29,14 +29,14 @@ type CreateURLUsecase struct {
 
 func (c *CreateURLUsecase) Execute(input CreateURLInputDto) (CreateURLOutputDto, error) {
 	url, _ := c.cacheRepository.Get(input.LongURL)
-	if url != nil {
+	if !url.IsEmpty() {
 		return CreateURLOutputDto{
 			ShortURL: url.ShortURL,
 		}, nil
 	}
 
 	url, err := c.urlRepository.FindByLongURL(input.LongURL)
-	if url != nil {
+	if !url.IsEmpty() {
 		return CreateURLOutputDto{
 			ShortURL: url.ShortURL,
 		}, nil
@@ -61,6 +61,6 @@ func (c *CreateURLUsecase) Execute(input CreateURLInputDto) (CreateURLOutputDto,
 	}
 
 	return CreateURLOutputDto{
-		ShortURL: url.ShortURL,
+		ShortURL: (*url).ShortURL,
 	}, nil
 }

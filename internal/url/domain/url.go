@@ -21,6 +21,10 @@ type URL struct {
 	ShortURL string
 }
 
+func (u *URL) IsEmpty() bool {
+	return u == nil
+}
+
 func (u *URL) Validate() error {
 	return nil
 }
