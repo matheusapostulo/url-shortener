@@ -15,7 +15,7 @@ func TestURLRepositoryGetNewAvailableID(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	query := "SELECT MAX(id) FROM urls"
+	query := "SELECT MAX(id) FROM url"
 
 	t.Run("Should return the next available ID", func(t *testing.T) {
 		mock.ExpectQuery(query).
@@ -47,7 +47,7 @@ func TestURLRepositoryFindByShortURL(t *testing.T) {
 	defer db.Close()
 
 	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
-	query := "SELECT id, long_url, short_url FROM urls WHERE short_url = ?"
+	query := "SELECT id, long_url, short_url FROM url WHERE short_url = ?"
 
 	t.Run("Should return a URL by short URL", func(t *testing.T) {
 		mock.ExpectQuery(query).
@@ -82,7 +82,7 @@ func TestURLRepositoryFindByLongURL(t *testing.T) {
 	defer db.Close()
 
 	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
-	query := "SELECT id, long_url, short_url FROM urls WHERE long_url = ?"
+	query := "SELECT id, long_url, short_url FROM url WHERE long_url = ?"
 
 	t.Run("Should return a URL by long URL", func(t *testing.T) {
 		mock.ExpectQuery(query).
@@ -117,7 +117,7 @@ func TestURLRepositorySave(t *testing.T) {
 	defer db.Close()
 
 	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
-	query := "INSERT INTO urls (long_url, short_url) VALUES (?, ?)"
+	query := "INSERT INTO url (long_url, short_url) VALUES (?, ?)"
 
 	t.Run("Should save a URL", func(t *testing.T) {
 		mock.ExpectExec(query).
@@ -161,7 +161,7 @@ func TestURLRepositoryDelete(t *testing.T) {
 	defer db.Close()
 
 	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
-	query := "DELETE FROM urls WHERE id = ?"
+	query := "DELETE FROM url WHERE id = ?"
 
 	t.Run("Should delete a URL", func(t *testing.T) {
 		mock.ExpectExec(query).
