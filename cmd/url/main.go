@@ -2,14 +2,30 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"net/http"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
+	httpPkg "github.com/matheusapostulo/url-shortener/internal/url/infra/http"
 	"github.com/matheusapostulo/url-shortener/internal/url/infra/repository"
 	"github.com/matheusapostulo/url-shortener/internal/url/infra/service"
 	"github.com/matheusapostulo/url-shortener/internal/url/usecase"
 )
 
 func main() {
-	db, err := sql.Open("mysql	", "test_user:test_password@tcp(mysql:3307)/test_db")
+	mysqlCfg := mysql.Config{
+		User:      "root",
+		Passwd:    "root",
+		Net:       "tcp",
+		Addr:      "localhost:3307",
+		DBName:    "urls",
+		ParseTime: true,
+	}
+
+	db, err := sql.Open("mysql", mysqlCfg.FormatDSN())
 	if err != nil {
 		panic(err)
 	}
@@ -25,4 +41,19 @@ func main() {
 	// Usecases
 	urlUsecase := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv)
 
+	// Handlers
+	urlHandler := httpPkg.NewURLHandler(*urlUsecase)
+
+	rt := chi.NewRouter()
+	rt.Use(middleware.Logger)
+
+	rt.Route("/api/v1", func(rt chi.Router) {
+		rt.Post("/shorten", urlHandler.CreateURL)
+	})
+
+	fmt.Println("Server running on port 8080")
+	err = http.ListenAndServe(":8080", rt)
+	if err != nil {
+		panic(err)
+	}
 }

@@ -10,7 +10,7 @@ type CacheRepositoryRedis struct {
 }
 
 func (c *CacheRepositoryRedis) Get(key string) (*domain.URL, error) {
-	return &domain.URL{}, nil
+	return nil, nil
 }
 
 func (c *CacheRepositoryRedis) Set(key string, url *domain.URL) error {
