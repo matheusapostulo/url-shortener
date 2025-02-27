@@ -30,7 +30,7 @@ func TestUsecaseCreateUrl(t *testing.T) {
 			name: "Should create a shorter url",
 			cacheMock: func() *mocks.CacheRepository {
 				mk := mocks.NewCacheRepository(t)
-				mk.On("Get", originalUrlInputTest).Return(nil, nil)
+				mk.On("Set", mock.Anything).Return(nil)
 				return mk
 			},
 			expectedCacheMockCalls: 1,
@@ -57,36 +57,10 @@ func TestUsecaseCreateUrl(t *testing.T) {
 			},
 		},
 		{
-			name: "Should return the shorter url from cache",
-			cacheMock: func() *mocks.CacheRepository {
-				mk := mocks.NewCacheRepository(t)
-				mk.On("Get", originalUrlInputTest).Return(&domain.URL{ShortURL: shortenerUrlOutputTest}, nil)
-				return mk
-			},
-			expectedCacheMockCalls: 1,
-			urlRpMock: func() *mocks.URLRepository {
-				mk := mocks.NewURLRepository(t)
-				return mk
-			},
-			expectedRpLongUrlMockCalls:        0,
-			expectedRpNewAvailableIDMockCalls: 0,
-			shortenerSvMock: func() *mocks.URLShortener {
-				mk := mocks.NewURLShortener(t)
-				return mk
-			},
-			expectedSvMockCalls: 0,
-			input: usecase.CreateURLInputDto{
-				LongURL: originalUrlInputTest,
-			},
-			expected: usecase.CreateURLOutputDto{
-				ShortURL: shortenerUrlOutputTest,
-			},
-		},
-		{
 			name: "Should return the shorter url from database",
 			cacheMock: func() *mocks.CacheRepository {
 				mk := mocks.NewCacheRepository(t)
-				mk.On("Get", originalUrlInputTest).Return(nil, nil)
+				mk.On("Set", mock.Anything).Return(nil)
 				return mk
 			},
 			expectedCacheMockCalls: 1,
@@ -113,8 +87,8 @@ func TestUsecaseCreateUrl(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			cacheRp := tc.cacheMock()
 			urlRp := tc.urlRpMock()
+			cacheRp := tc.cacheMock()
 			shortenerSv := tc.shortenerSvMock()
 
 			createUrl := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv)
@@ -122,10 +96,10 @@ func TestUsecaseCreateUrl(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, tc.expected.ShortURL, output.ShortURL)
-			cacheRp.AssertNumberOfCalls(t, "Get", tc.expectedCacheMockCalls)
 			urlRp.AssertNumberOfCalls(t, "FindByLongURL", tc.expectedRpLongUrlMockCalls)
 			urlRp.AssertNumberOfCalls(t, "GetNewAvailableID", tc.expectedRpNewAvailableIDMockCalls)
 			shortenerSv.AssertNumberOfCalls(t, "ShortenURL", tc.expectedSvMockCalls)
+			cacheRp.AssertNumberOfCalls(t, "Set", tc.expectedCacheMockCalls)
 		})
 	}
 

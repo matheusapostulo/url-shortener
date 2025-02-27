@@ -13,6 +13,6 @@ func (c *CacheRepositoryRedis) Get(key string) (*domain.URL, error) {
 	return nil, nil
 }
 
-func (c *CacheRepositoryRedis) Set(key string, url *domain.URL) error {
+func (c *CacheRepositoryRedis) Set(url *domain.URL) error {
 	return nil
 }

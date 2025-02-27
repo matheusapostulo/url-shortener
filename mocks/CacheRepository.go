@@ -42,17 +42,17 @@ func (_m *CacheRepository) Get(key string) (*domain.URL, error) {
 	return r0, r1
 }
 
-// Set provides a mock function with given fields: key, url
-func (_m *CacheRepository) Set(key string, url *domain.URL) error {
-	ret := _m.Called(key, url)
+// Set provides a mock function with given fields: url
+func (_m *CacheRepository) Set(url *domain.URL) error {
+	ret := _m.Called(url)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Set")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, *domain.URL) error); ok {
-		r0 = rf(key, url)
+	if rf, ok := ret.Get(0).(func(*domain.URL) error); ok {
+		r0 = rf(url)
 	} else {
 		r0 = ret.Error(0)
 	}
