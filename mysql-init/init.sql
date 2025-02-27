@@ -6,7 +6,7 @@ USE urls;
 
 CREATE TABLE url(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    long_url VARCHAR(255) NOT NULL,
+    long_url VARCHAR(2048) NOT NULL,
     short_url VARCHAR(10) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

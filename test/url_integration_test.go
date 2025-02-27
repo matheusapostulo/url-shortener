@@ -13,7 +13,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-sql-driver/mysql"
-	_ "github.com/go-sql-driver/mysql"
 	httpPkg "github.com/matheusapostulo/url-shortener/internal/url/infra/http"
 	"github.com/matheusapostulo/url-shortener/internal/url/infra/repository"
 	"github.com/matheusapostulo/url-shortener/internal/url/infra/service"
@@ -97,16 +96,18 @@ func init() {
 		shortenerSv := service.NewURLShortenerBase62()
 
 		// Usecases
-		urlUsecase := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv)
+		createURLUsecase := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv)
+		redirectURLUsecase := usecase.NewRedirectURLUsecase(cacheRp, urlRp)
 
 		// Handlers
-		urlHandler := httpPkg.NewURLHandler(*urlUsecase)
+		urlHandler := httpPkg.NewURLHandler(*createURLUsecase, *redirectURLUsecase)
 
 		rt := chi.NewRouter()
 		rt.Use(middleware.Logger)
 
 		rt.Route("/api/v1", func(rt chi.Router) {
 			rt.Post("/shorten", urlHandler.CreateURL)
+			rt.Get("/{short-url}", urlHandler.RedirectURL)
 		})
 
 		fmt.Println("Server running on port 8080")
