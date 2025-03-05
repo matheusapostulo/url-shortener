@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/matheusapostulo/url-shortener/internal/url/domain"
+	"github.com/matheusapostulo/url-shortener/internal/url/port"
 	"github.com/matheusapostulo/url-shortener/internal/url/usecase"
 	"github.com/matheusapostulo/url-shortener/mocks"
 	"github.com/stretchr/testify/mock"
@@ -21,8 +22,8 @@ func TestRedirectURL(t *testing.T) {
 		expectedCacheSetMockCalls  int
 		urlRpMock                  func() *mocks.URLRepository
 		expectedRpLongUrlMockCalls int
-		input                      usecase.RedirectURLInputDto
-		expected                   usecase.RedirectURLOutputDto
+		input                      port.RedirectURLInputDto
+		expected                   port.RedirectURLOutputDto
 		expectedErr                error
 	}{
 		{
@@ -40,10 +41,10 @@ func TestRedirectURL(t *testing.T) {
 				return mocks.NewURLRepository(t)
 			},
 			expectedRpLongUrlMockCalls: 0,
-			input: usecase.RedirectURLInputDto{
+			input: port.RedirectURLInputDto{
 				ShortURL: shortUrlInputTest,
 			},
-			expected: usecase.RedirectURLOutputDto{
+			expected: port.RedirectURLOutputDto{
 				LongURL: longUrlOutputTest,
 			},
 			expectedErr: nil,
@@ -66,10 +67,10 @@ func TestRedirectURL(t *testing.T) {
 				return mk
 			},
 			expectedRpLongUrlMockCalls: 1,
-			input: usecase.RedirectURLInputDto{
+			input: port.RedirectURLInputDto{
 				ShortURL: shortUrlInputTest,
 			},
-			expected: usecase.RedirectURLOutputDto{
+			expected: port.RedirectURLOutputDto{
 				LongURL: longUrlOutputTest,
 			},
 			expectedErr: nil,
@@ -89,10 +90,10 @@ func TestRedirectURL(t *testing.T) {
 				return mk
 			},
 			expectedRpLongUrlMockCalls: 1,
-			input: usecase.RedirectURLInputDto{
+			input: port.RedirectURLInputDto{
 				ShortURL: shortUrlInputTest,
 			},
-			expected:    usecase.RedirectURLOutputDto{},
+			expected:    port.RedirectURLOutputDto{},
 			expectedErr: domain.ErrURLNotFound,
 		},
 	}

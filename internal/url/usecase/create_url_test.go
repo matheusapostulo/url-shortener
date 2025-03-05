@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/matheusapostulo/url-shortener/internal/url/domain"
+	"github.com/matheusapostulo/url-shortener/internal/url/port"
 	"github.com/matheusapostulo/url-shortener/internal/url/usecase"
 	"github.com/matheusapostulo/url-shortener/mocks"
 	"github.com/stretchr/testify/mock"
@@ -23,8 +24,8 @@ func TestUsecaseCreateUrl(t *testing.T) {
 		expectedRpNewAvailableIDMockCalls int
 		shortenerSvMock                   func() *mocks.URLShortener
 		expectedSvMockCalls               int
-		input                             usecase.CreateURLInputDto
-		expected                          usecase.CreateURLOutputDto
+		input                             port.CreateURLInputDto
+		expected                          port.CreateURLOutputDto
 	}{
 		{
 			name: "Should create a shorter url",
@@ -49,10 +50,10 @@ func TestUsecaseCreateUrl(t *testing.T) {
 				return mk
 			},
 			expectedSvMockCalls: 1,
-			input: usecase.CreateURLInputDto{
+			input: port.CreateURLInputDto{
 				LongURL: originalUrlInputTest,
 			},
-			expected: usecase.CreateURLOutputDto{
+			expected: port.CreateURLOutputDto{
 				ShortURL: shortenerUrlOutputTest,
 			},
 		},
@@ -76,10 +77,10 @@ func TestUsecaseCreateUrl(t *testing.T) {
 				return mk
 			},
 			expectedSvMockCalls: 0,
-			input: usecase.CreateURLInputDto{
+			input: port.CreateURLInputDto{
 				LongURL: originalUrlInputTest,
 			},
-			expected: usecase.CreateURLOutputDto{
+			expected: port.CreateURLOutputDto{
 				ShortURL: shortenerUrlOutputTest,
 			},
 		},

@@ -5,14 +5,6 @@ import (
 	"github.com/matheusapostulo/url-shortener/internal/url/port"
 )
 
-type CreateURLInputDto struct {
-	LongURL string `json:"long_url"`
-}
-
-type CreateURLOutputDto struct {
-	ShortURL string `json:"short_url"`
-}
-
 func NewCreateURLUsecase(urlRp port.URLRepository, cacheRp port.CacheRepository, shortenerSv port.URLShortener) *CreateURLUsecase {
 	return &CreateURLUsecase{
 		urlRepository:    urlRp,
@@ -27,46 +19,46 @@ type CreateURLUsecase struct {
 	ShortenerService port.URLShortener
 }
 
-func (c *CreateURLUsecase) Execute(input CreateURLInputDto) (CreateURLOutputDto, error) {
+func (c *CreateURLUsecase) Execute(input port.CreateURLInputDto) (port.CreateURLOutputDto, error) {
 	url, _ := c.urlRepository.FindByLongURL(input.LongURL)
 	if !url.IsEmpty() {
 		err := c.cacheRepository.Set(url)
 
 		if err != nil {
-			return CreateURLOutputDto{}, err
+			return port.CreateURLOutputDto{}, err
 		}
 
-		return CreateURLOutputDto{
+		return port.CreateURLOutputDto{
 			ShortURL: url.ShortURL,
 		}, nil
 	}
 
 	newAvailableUrlID, err := c.urlRepository.GetNewAvailableID()
 	if err != nil {
-		return CreateURLOutputDto{}, err
+		return port.CreateURLOutputDto{}, err
 	}
 
 	shortURL, err := c.ShortenerService.ShortenURL(newAvailableUrlID)
 	if err != nil {
-		return CreateURLOutputDto{}, err
+		return port.CreateURLOutputDto{}, err
 	}
 
 	url, err = domain.NewURL(newAvailableUrlID, input.LongURL, shortURL)
 	if err != nil {
-		return CreateURLOutputDto{}, err
+		return port.CreateURLOutputDto{}, err
 	}
 
 	err = c.urlRepository.Save(url)
 	if err != nil {
-		return CreateURLOutputDto{}, err
+		return port.CreateURLOutputDto{}, err
 	}
 
 	err = c.cacheRepository.Set(url)
 	if err != nil {
-		return CreateURLOutputDto{}, err
+		return port.CreateURLOutputDto{}, err
 	}
 
-	return CreateURLOutputDto{
+	return port.CreateURLOutputDto{
 		ShortURL: (*url).ShortURL,
 	}, nil
 }

@@ -100,7 +100,7 @@ func init() {
 		redirectURLUsecase := usecase.NewRedirectURLUsecase(cacheRp, urlRp)
 
 		// Handlers
-		urlHandler := httpPkg.NewURLHandler(*createURLUsecase, *redirectURLUsecase)
+		urlHandler := httpPkg.NewURLHandler(createURLUsecase, redirectURLUsecase)
 
 		rt := chi.NewRouter()
 		rt.Use(middleware.Logger)
