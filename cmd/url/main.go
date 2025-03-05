@@ -13,6 +13,7 @@ import (
 	"github.com/matheusapostulo/url-shortener/internal/url/infra/repository"
 	"github.com/matheusapostulo/url-shortener/internal/url/infra/service"
 	"github.com/matheusapostulo/url-shortener/internal/url/usecase"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -25,15 +26,22 @@ func main() {
 		ParseTime: true,
 	}
 
+	// db
 	db, err := sql.Open("mysql", mysqlCfg.FormatDSN())
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
+	// cache
+	rdb := redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
+	defer rdb.Close()
+
 	// Repositories
 	urlRp := repository.NewURLRepositoryDatabase(db)
-	cacheRp := repository.NewCacheRepositoryRedis()
+	cacheRp := repository.NewCacheRepositoryRedis(rdb)
 
 	// Services
 	shortenerSv := service.NewURLShortenerBase62()

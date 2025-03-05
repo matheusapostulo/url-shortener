@@ -16,3 +16,14 @@ services:
       retries: 3
     volumes:
       - ./mysql-init:/docker-entrypoint-initdb.d
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data: 
+    driver: local

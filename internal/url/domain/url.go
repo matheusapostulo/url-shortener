@@ -16,9 +16,9 @@ func NewURL(ID int, longURL string, shortURL string) (url *URL, err error) {
 }
 
 type URL struct {
-	ID       int
-	LongURL  string
-	ShortURL string
+	ID       int    `json:"id"`
+	LongURL  string `json:"long_url"`
+	ShortURL string `json:"short_url"`
 }
 
 func (u *URL) IsEmpty() bool {
