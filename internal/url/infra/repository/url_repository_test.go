@@ -10,8 +10,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var (
+	longURL  = "http://www.google.com"
+	shortURL = "http://localhost:8080/1"
+)
+
 func TestURLRepositoryGetNewAvailableID(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db2, _, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
 
@@ -21,7 +27,7 @@ func TestURLRepositoryGetNewAvailableID(t *testing.T) {
 		mock.ExpectQuery(query).
 			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
-		repo := repository.NewURLRepositoryDatabase(db)
+		repo := repository.NewURLRepositoryDatabase(db, db2)
 
 		id, err := repo.GetNewAvailableID()
 
@@ -34,7 +40,7 @@ func TestURLRepositoryGetNewAvailableID(t *testing.T) {
 		mock.ExpectQuery(query).
 			WillReturnError(sql.ErrConnDone)
 
-		rp := repository.NewURLRepositoryDatabase(db)
+		rp := repository.NewURLRepositoryDatabase(db, db2)
 		_, err := rp.GetNewAvailableID()
 
 		require.Error(t, err)
@@ -43,10 +49,12 @@ func TestURLRepositoryGetNewAvailableID(t *testing.T) {
 
 func TestURLRepositoryFindByShortURL(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db2, _, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
 	require.NoError(t, err)
 	defer db.Close()
 
-	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
+	url, _ := domain.NewURL(1, longURL, shortURL)
 	query := "SELECT id, long_url, short_url FROM url WHERE short_url = ?"
 
 	t.Run("Should return a URL by short URL", func(t *testing.T) {
@@ -55,7 +63,7 @@ func TestURLRepositoryFindByShortURL(t *testing.T) {
 			WillReturnRows(sqlmock.NewRows([]string{"id", "long_url", "short_url"}).
 				AddRow(url.ID, url.LongURL, url.ShortURL))
 
-		repo := repository.NewURLRepositoryDatabase(db)
+		repo := repository.NewURLRepositoryDatabase(db, db2)
 
 		result, err := repo.FindByShortURL(url.ShortURL)
 
@@ -69,7 +77,7 @@ func TestURLRepositoryFindByShortURL(t *testing.T) {
 			WithArgs(url.ShortURL).
 			WillReturnError(sql.ErrConnDone)
 
-		rp := repository.NewURLRepositoryDatabase(db)
+		rp := repository.NewURLRepositoryDatabase(db, db2)
 		_, err := rp.FindByShortURL(url.ShortURL)
 
 		require.Error(t, err)
@@ -78,10 +86,11 @@ func TestURLRepositoryFindByShortURL(t *testing.T) {
 
 func TestURLRepositoryFindByLongURL(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db2, _, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
 
-	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
+	url, _ := domain.NewURL(1, longURL, shortURL)
 	query := "SELECT id, long_url, short_url FROM url WHERE long_url = ?"
 
 	t.Run("Should return a URL by long URL", func(t *testing.T) {
@@ -90,7 +99,7 @@ func TestURLRepositoryFindByLongURL(t *testing.T) {
 			WillReturnRows(sqlmock.NewRows([]string{"id", "long_url", "short_url"}).
 				AddRow(url.ID, url.LongURL, url.ShortURL))
 
-		repo := repository.NewURLRepositoryDatabase(db)
+		repo := repository.NewURLRepositoryDatabase(db, db2)
 
 		result, err := repo.FindByLongURL(url.LongURL)
 
@@ -104,7 +113,7 @@ func TestURLRepositoryFindByLongURL(t *testing.T) {
 			WithArgs(url.LongURL).
 			WillReturnError(sql.ErrConnDone)
 
-		rp := repository.NewURLRepositoryDatabase(db)
+		rp := repository.NewURLRepositoryDatabase(db, db2)
 		_, err := rp.FindByLongURL(url.LongURL)
 
 		require.Error(t, err)
@@ -113,10 +122,12 @@ func TestURLRepositoryFindByLongURL(t *testing.T) {
 
 func TestURLRepositorySave(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db2, _, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+
 	require.NoError(t, err)
 	defer db.Close()
 
-	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
+	url, _ := domain.NewURL(1, longURL, shortURL)
 	query := "INSERT INTO url (long_url, short_url) VALUES (?, ?)"
 
 	t.Run("Should save a URL", func(t *testing.T) {
@@ -124,7 +135,7 @@ func TestURLRepositorySave(t *testing.T) {
 			WithArgs(url.LongURL, url.ShortURL).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
-		repo := repository.NewURLRepositoryDatabase(db)
+		repo := repository.NewURLRepositoryDatabase(db, db2)
 
 		err := repo.Save(url)
 
@@ -137,7 +148,7 @@ func TestURLRepositorySave(t *testing.T) {
 			WithArgs(url.LongURL, url.ShortURL).
 			WillReturnError(sql.ErrConnDone)
 
-		rp := repository.NewURLRepositoryDatabase(db)
+		rp := repository.NewURLRepositoryDatabase(db, db2)
 		err := rp.Save(url)
 
 		require.Error(t, err)
@@ -148,7 +159,7 @@ func TestURLRepositorySave(t *testing.T) {
 			WithArgs(url.LongURL, url.ShortURL).
 			WillReturnResult(sqlmock.NewErrorResult(sql.ErrConnDone))
 
-		rp := repository.NewURLRepositoryDatabase(db)
+		rp := repository.NewURLRepositoryDatabase(db, db2)
 		err := rp.Save(url)
 
 		require.Error(t, err)
@@ -157,10 +168,11 @@ func TestURLRepositorySave(t *testing.T) {
 
 func TestURLRepositoryDelete(t *testing.T) {
 	db, mock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+	db2, _, _ := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	require.NoError(t, err)
 	defer db.Close()
 
-	url, _ := domain.NewURL(1, "http://www.google.com", "http://localhost:8080/1")
+	url, _ := domain.NewURL(1, longURL, shortURL)
 	query := "DELETE FROM url WHERE id = ?"
 
 	t.Run("Should delete a URL", func(t *testing.T) {
@@ -168,7 +180,7 @@ func TestURLRepositoryDelete(t *testing.T) {
 			WithArgs(url.ID).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
-		repo := repository.NewURLRepositoryDatabase(db)
+		repo := repository.NewURLRepositoryDatabase(db, db2)
 
 		err := repo.Delete(url.ID)
 
@@ -181,7 +193,7 @@ func TestURLRepositoryDelete(t *testing.T) {
 			WithArgs(url.ID).
 			WillReturnError(sql.ErrConnDone)
 
-		rp := repository.NewURLRepositoryDatabase(db)
+		rp := repository.NewURLRepositoryDatabase(db, db2)
 		err := rp.Delete(url.ID)
 
 		require.Error(t, err)
