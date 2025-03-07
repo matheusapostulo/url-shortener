@@ -2,6 +2,11 @@ DROP DATABASE IF EXISTS urls;
 
 CREATE DATABASE urls;
 
+DROP USER IF EXISTS 'user'@'%';
+CREATE USER 'user'@'%' IDENTIFIED BY 'pass';
+GRANT ALL PRIVILEGES ON urls.* TO 'user'@'%';
+FLUSH PRIVILEGES;
+
 USE urls;
 
 CREATE TABLE url(
@@ -10,4 +15,5 @@ CREATE TABLE url(
     short_url VARCHAR(10) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
