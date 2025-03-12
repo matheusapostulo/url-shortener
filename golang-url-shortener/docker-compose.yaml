@@ -1,0 +1,96 @@
+services:
+  # golang-api:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: golang-api
+  #   working_dir: /app
+  #   depends_on:
+  #     - mysql-master
+  #     - mysql-replica1
+  #     - mysql-replica2
+  #     - redis
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - .:/app
+  #     - /go/pkg/mod:/go/pkg/mod
+  #   command: sh -c "air -c air.toml"
+
+  mysql-master:
+    image: mysql:latest
+    container_name: mysql-master
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: urls
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mysql-init/master-config/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - mysql-network
+    restart: always
+  
+  mysql-replica1:
+    image: mysql:latest
+    container_name: mysql-replica1
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: urls
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+      - ./mysql-init/replica-config/my1.cnf:/etc/mysql/my.cnf
+    networks:
+      - mysql-network
+    depends_on:
+      - mysql-master
+    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-slave.sh && docker-entrypoint.sh mysqld"]
+    restart: always
+
+  mysql-replica2:
+    image: mysql:latest
+    container_name: mysql-replica2
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: urls
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+      - ./mysql-init/replica-config/my2.cnf:/etc/mysql/my.cnf
+    networks:
+      - mysql-network
+    depends_on:
+      - mysql-master
+    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-slave.sh && docker-entrypoint.sh mysqld"]
+    restart: always
+    
+  redis:
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data: 
+    driver: local
+
+networks:
+  mysql-network:
+    driver: bridge

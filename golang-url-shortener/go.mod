@@ -1,6 +1,6 @@
 module github.com/matheusapostulo/url-shortener
 
-go 1.23
+go 1.23.3
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2

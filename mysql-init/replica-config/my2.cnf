@@ -1,6 +1,0 @@
-[mysqld]
-
-server-id = 3
-log-bin = mysql-bin
-bind-address = 0.0.0.0
-binlog-do-db = urls
