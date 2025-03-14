@@ -45,6 +45,9 @@ func (u *URLRepositoryDatabase) FindByShortURL(shortURL string) (*domain.URL, er
 
 	err := row.Scan(&url.ID, &url.LongURL, &url.ShortURL)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrURLNotFound
+		}
 		return nil, err
 	}
 
@@ -59,6 +62,9 @@ func (u *URLRepositoryDatabase) FindByLongURL(longURL string) (*domain.URL, erro
 
 	err := row.Scan(&url.ID, &url.LongURL, &url.ShortURL)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, domain.ErrURLNotFound
+		}
 		return nil, err
 	}
 

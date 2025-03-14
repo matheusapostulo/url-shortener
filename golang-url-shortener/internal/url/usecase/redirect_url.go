@@ -26,10 +26,10 @@ func (r *RedirectURLUsecase) Execute(input port.RedirectURLInputDto) (port.Redir
 	}
 
 	url, err := r.urlRepository.FindByShortURL(input.ShortURL)
-	if url.IsEmpty() {
-		return port.RedirectURLOutputDto{}, domain.ErrURLNotFound
-	}
 	if err != nil {
+		if err == domain.ErrURLNotFound {
+			return port.RedirectURLOutputDto{}, domain.ErrURLNotFound
+		}
 		return port.RedirectURLOutputDto{}, domain.ErrInternalServerError
 	}
 
