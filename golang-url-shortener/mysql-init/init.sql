@@ -3,8 +3,11 @@ DROP DATABASE IF EXISTS urls;
 CREATE DATABASE urls;
 
 DROP USER IF EXISTS 'user'@'%';
+
 CREATE USER 'user'@'%' IDENTIFIED BY 'pass';
-GRANT ALL PRIVILEGES ON urls.* TO 'user'@'%';
+
+GRANT ALL PRIVILEGES ON *.* TO 'user'@'%';
+
 FLUSH PRIVILEGES;
 
 USE urls;

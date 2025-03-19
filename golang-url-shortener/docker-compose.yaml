@@ -39,6 +39,7 @@ services:
     volumes:
       - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./mysql-init/master-config/my.cnf:/etc/mysql/my.cnf
+    command: bash -c "chmod -R 755 /var/run/mysqld && docker-entrypoint.sh mysqld"
     networks:
       - mysql-network
     restart: always
@@ -53,14 +54,20 @@ services:
       MYSQL_PASSWORD: pass
     ports:
       - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
-      - ./mysql-init:/docker-entrypoint-initdb.d
+      - ./mysql-init/init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
       - ./mysql-init/replica-config/my1.cnf:/etc/mysql/my.cnf
     networks:
       - mysql-network
     depends_on:
-      - mysql-master
-    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-slave.sh && docker-entrypoint.sh mysqld"]
+      mysql-master:
+        condition: service_healthy
+    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-replica.sh && docker-entrypoint.sh mysqld"]
     restart: always
 
   mysql-replica2:
@@ -73,16 +80,43 @@ services:
       MYSQL_PASSWORD: pass
     ports:
       - "3308:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     volumes:
-      - ./mysql-init:/docker-entrypoint-initdb.d
+      - ./mysql-init/init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
       - ./mysql-init/replica-config/my2.cnf:/etc/mysql/my.cnf
     networks:
       - mysql-network
     depends_on:
-      - mysql-master
-    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-slave.sh && docker-entrypoint.sh mysqld"]
+      mysql-master:
+        condition: service_healthy
+    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-replica.sh && docker-entrypoint.sh mysqld"]
     restart: always
-    
+
+  mysql-router:
+    image: mysql/mysql-router:8.0
+    container_name: mysql-router
+    environment:
+      MYSQL_ROUTER_BOOTSTRAP_SERVER: "mysql-master:3306"
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "6446:6446"
+    networks:
+      - mysql-network
+    depends_on:
+      - mysql-master
+      - mysql-replica1
+      - mysql-replica2
+    volumes:
+      - ./mysql-init/mysqlrouter-config/mysqlrouter.cnf:/etc/mysqlrouter/mysqlrouter.cnf
+      - ./mysql-init/init-mysql-router.sh:/docker-entrypoint-initdb.d/init-mysql-router.sh
+    entrypoint: ["/bin/bash", "/docker-entrypoint-initdb.d/init-mysql-router.sh"]
+    user: root
+    restart: always
+
   redis:
     image: redis:latest
     container_name: redis-cache
