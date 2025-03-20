@@ -26,4 +26,4 @@ else
     exit 1
 fi
 
-mysqlrouter --config /etc/mysqlrouter/mysqlrouter.cnf
+mysqlrouter --config /etc/mysqlrouter/mysqlrouter.cnf --bootstrap "root:root@mysql-master:3306" --user=root

@@ -1,8 +1,8 @@
 [mysqld]
 
-server-id = 3
+server_id = 3
 log-bin = mysql-bin
 bind-address = 0.0.0.0
-binlog-do-db = urls
-gtid_mode = ON
-enforce-gtid-consistency = true
+
+gtid_mode=ON
+enforce_gtid_consistency=ON
