@@ -8,14 +8,13 @@ import (
 )
 
 type Dependencies struct {
-	WriteDB     *sql.DB
-	ReadDB      *sql.DB
+	DB          *sql.DB
 	CacheClient *redis.Client
 }
 
 func BuildDependencies() (*Dependencies, error) {
 	//db
-	writeDb, readDb, err := config.BuildDb()
+	proxysql, err := config.BuildDb()
 	if err != nil {
 		return nil, err
 	}
@@ -24,8 +23,7 @@ func BuildDependencies() (*Dependencies, error) {
 	client := config.BuildCache()
 
 	return &Dependencies{
-		WriteDB:     writeDb,
-		ReadDB:      readDb,
+		DB:          proxysql,
 		CacheClient: client,
 	}, nil
 }

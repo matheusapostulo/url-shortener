@@ -11,8 +11,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer dependencies.WriteDB.Close()
-	defer dependencies.ReadDB.Close()
+	defer dependencies.DB.Close()
 	defer dependencies.CacheClient.Close()
 
 	application.Run(*dependencies)
