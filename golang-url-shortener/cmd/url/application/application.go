@@ -15,7 +15,7 @@ import (
 
 func Run(depend dependencies.Dependencies) {
 	// Repositories
-	urlRp := repository.NewURLRepositoryDatabase(depend.WriteDB, depend.ReadDB)
+	urlRp := repository.NewURLRepositoryDatabase(depend.DB)
 	cacheRp := repository.NewCacheRepositoryRedis(depend.CacheClient)
 
 	// Services

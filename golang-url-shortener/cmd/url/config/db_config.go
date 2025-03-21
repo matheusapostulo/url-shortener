@@ -19,19 +19,13 @@ func openConnection(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
-func BuildDb() (writeDB *sql.DB, readDB *sql.DB, err error) {
-	master := "root:root@tcp(localhost:3306)/urls"
-	mySqlRouter := "root:root@tcp(localhost:3307)/urls"
+func BuildDb() (proxysql *sql.DB, err error) {
+	proxysqlDsn := "user:pass@tcp(localhost:6033)/urls"
 
-	writeDB, err = openConnection(master)
+	proxysql, err = openConnection(proxysqlDsn)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	readDB, err = openConnection(mySqlRouter)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return writeDB, readDB, nil
+	return proxysql, nil
 }

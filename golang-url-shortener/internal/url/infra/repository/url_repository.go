@@ -6,21 +6,19 @@ import (
 	"github.com/matheusapostulo/url-shortener/internal/url/domain"
 )
 
-func NewURLRepositoryDatabase(writeDB *sql.DB, readDB *sql.DB) *URLRepositoryDatabase {
+func NewURLRepositoryDatabase(db *sql.DB) *URLRepositoryDatabase {
 	return &URLRepositoryDatabase{
-		writeDB: writeDB,
-		readDB:  readDB,
+		db: db,
 	}
 }
 
 type URLRepositoryDatabase struct {
-	writeDB *sql.DB
-	readDB  *sql.DB
+	db *sql.DB
 }
 
 func (u *URLRepositoryDatabase) GetNewAvailableID() (int, error) {
 	query := "SELECT MAX(id) FROM url"
-	row := u.writeDB.QueryRow(query)
+	row := u.db.QueryRow(query)
 
 	var id sql.NullInt64
 
@@ -41,7 +39,7 @@ func (u *URLRepositoryDatabase) FindByShortURL(shortURL string) (*domain.URL, er
 	query := "SELECT id, long_url, short_url FROM url WHERE short_url = ?"
 	var url domain.URL
 
-	row := u.readDB.QueryRow(query, shortURL)
+	row := u.db.QueryRow(query, shortURL)
 
 	err := row.Scan(&url.ID, &url.LongURL, &url.ShortURL)
 	if err != nil {
@@ -58,7 +56,7 @@ func (u *URLRepositoryDatabase) FindByLongURL(longURL string) (*domain.URL, erro
 	query := "SELECT id, long_url, short_url FROM url WHERE long_url = ?"
 	var url domain.URL
 
-	row := u.readDB.QueryRow(query, longURL)
+	row := u.db.QueryRow(query, longURL)
 
 	err := row.Scan(&url.ID, &url.LongURL, &url.ShortURL)
 	if err != nil {
@@ -73,7 +71,7 @@ func (u *URLRepositoryDatabase) FindByLongURL(longURL string) (*domain.URL, erro
 
 func (u *URLRepositoryDatabase) Save(url *domain.URL) error {
 	query := "INSERT INTO url (long_url, short_url) VALUES (?, ?)"
-	result, err := u.writeDB.Exec(query, (*url).LongURL, (*url).ShortURL)
+	result, err := u.db.Exec(query, (*url).LongURL, (*url).ShortURL)
 
 	if err != nil {
 		return err
@@ -91,7 +89,7 @@ func (u *URLRepositoryDatabase) Save(url *domain.URL) error {
 
 func (u *URLRepositoryDatabase) Delete(id int) error {
 	query := "DELETE FROM url WHERE id = ?"
-	_, err := u.writeDB.Exec(query, id)
+	_, err := u.db.Exec(query, id)
 	if err != nil {
 		return err
 	}

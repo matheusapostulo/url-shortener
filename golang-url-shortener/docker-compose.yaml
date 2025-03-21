@@ -96,26 +96,30 @@ services:
     command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-replica.sh && docker-entrypoint.sh mysqld"]
     restart: always
 
-  mysql-router:
-    image: mysql/mysql-router:8.0
-    container_name: mysql-router
+  proxysql:
+    image: proxysql/proxysql:latest
+    container_name: proxysql
     environment:
-      MYSQL_ROUTER_BOOTSTRAP_SERVER: "mysql-master:3306"
-      MYSQL_ROOT_PASSWORD: root
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_HOST=mysql-master
+      - MYSQL_PORT=3306
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pass
     ports:
-      - "6446:6446"
+      - "6033:6033"
+      - "6032:6032"
+      - "6080:6080"
+    volumes:
+      - ./mysql-init/proxysql-config/proxysql.cnf:/etc/proxysql.cnf
     networks:
       - mysql-network
     depends_on:
-      - mysql-master
-      - mysql-replica1
-      - mysql-replica2
-    volumes:
-      - ./mysql-init/mysqlrouter-config/mysqlrouter.cnf:/etc/mysqlrouter/mysqlrouter.cnf
-      - ./mysql-init/init-mysql-router.sh:/docker-entrypoint-initdb.d/init-mysql-router.sh
-    entrypoint: ["/bin/bash", "/docker-entrypoint-initdb.d/init-mysql-router.sh"]
-    user: root
-    restart: always
+      mysql-master:
+        condition: service_healthy
+      mysql-replica1:
+        condition: service_healthy
+      mysql-replica2:
+        condition: service_healthy
 
   redis:
     image: redis:latest
