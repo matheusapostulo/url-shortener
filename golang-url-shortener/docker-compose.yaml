@@ -39,10 +39,11 @@ services:
     volumes:
       - ./mysql-init/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./mysql-init/master-config/my.cnf:/etc/mysql/my.cnf
+    command: bash -c "chmod -R 755 /var/run/mysqld && docker-entrypoint.sh mysqld"
     networks:
       - mysql-network
     restart: always
-
+  
   mysql-replica1:
     image: mysql:latest
     container_name: mysql-replica1
@@ -59,13 +60,14 @@ services:
       timeout: 5s
       retries: 3
     volumes:
+      - ./mysql-init/init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
       - ./mysql-init/replica-config/my1.cnf:/etc/mysql/my.cnf
     networks:
       - mysql-network
     depends_on:
       mysql-master:
         condition: service_healthy
-    command: ["sh", "-c", "docker-entrypoint.sh mysqld"]
+    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-replica.sh && docker-entrypoint.sh mysqld"]
     restart: always
 
   mysql-replica2:
@@ -84,13 +86,14 @@ services:
       timeout: 5s
       retries: 3
     volumes:
+      - ./mysql-init/init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
       - ./mysql-init/replica-config/my2.cnf:/etc/mysql/my.cnf
     networks:
       - mysql-network
     depends_on:
       mysql-master:
         condition: service_healthy
-    command: ["sh", "-c", "docker-entrypoint.sh mysqld"]
+    command: ["sh", "-c", "/docker-entrypoint-initdb.d/init-replica.sh && docker-entrypoint.sh mysqld"]
     restart: always
 
   proxysql:
