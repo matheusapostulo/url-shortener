@@ -13,6 +13,7 @@ func main() {
 	}
 	defer dependencies.DB.Close()
 	defer dependencies.CacheClient.Close()
+	defer dependencies.RabbitMQConn.Close()
 
 	application.Run(*dependencies)
 }

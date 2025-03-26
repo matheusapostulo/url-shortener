@@ -24,6 +24,8 @@ func TestUsecaseCreateUrl(t *testing.T) {
 		expectedRpNewAvailableIDMockCalls int
 		shortenerSvMock                   func() *mocks.URLShortener
 		expectedSvMockCalls               int
+		logPublisherMock                  func() *mocks.LogPublisherService
+		expectedLogPublisherMockCalls     int
 		input                             port.CreateURLInputDto
 		expected                          port.CreateURLOutputDto
 	}{
@@ -50,6 +52,12 @@ func TestUsecaseCreateUrl(t *testing.T) {
 				return mk
 			},
 			expectedSvMockCalls: 1,
+			logPublisherMock: func() *mocks.LogPublisherService {
+				mk := mocks.NewLogPublisherService(t)
+				mk.On("PublishLog", mock.Anything).Return(nil)
+				return mk
+			},
+			expectedLogPublisherMockCalls: 1,
 			input: port.CreateURLInputDto{
 				LongURL: originalUrlInputTest,
 			},
@@ -77,6 +85,12 @@ func TestUsecaseCreateUrl(t *testing.T) {
 				return mk
 			},
 			expectedSvMockCalls: 0,
+			logPublisherMock: func() *mocks.LogPublisherService {
+				mk := mocks.NewLogPublisherService(t)
+				mk.On("PublishLog", mock.Anything).Return(nil)
+				return mk
+			},
+			expectedLogPublisherMockCalls: 1,
 			input: port.CreateURLInputDto{
 				LongURL: originalUrlInputTest,
 			},
@@ -91,8 +105,9 @@ func TestUsecaseCreateUrl(t *testing.T) {
 			urlRp := tc.urlRpMock()
 			cacheRp := tc.cacheMock()
 			shortenerSv := tc.shortenerSvMock()
+			logPublisherSv := tc.logPublisherMock()
 
-			createUrl := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv)
+			createUrl := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv, logPublisherSv)
 			output, err := createUrl.Execute(tc.input)
 
 			require.NoError(t, err)
@@ -101,6 +116,7 @@ func TestUsecaseCreateUrl(t *testing.T) {
 			urlRp.AssertNumberOfCalls(t, "GetNewAvailableID", tc.expectedRpNewAvailableIDMockCalls)
 			shortenerSv.AssertNumberOfCalls(t, "ShortenURL", tc.expectedSvMockCalls)
 			cacheRp.AssertNumberOfCalls(t, "Set", tc.expectedCacheMockCalls)
+			logPublisherSv.AssertNumberOfCalls(t, "PublishLog", tc.expectedLogPublisherMockCalls)
 		})
 	}
 

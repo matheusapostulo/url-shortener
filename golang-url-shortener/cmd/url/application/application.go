@@ -20,9 +20,10 @@ func Run(depend dependencies.Dependencies) {
 
 	// Services
 	shortenerSv := service.NewURLShortenerBase62()
+	logPublisherSv := service.NewLogPublisherService(depend.RabbitMQConn)
 
 	// Usecases
-	createURLUsecase := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv)
+	createURLUsecase := usecase.NewCreateURLUsecase(urlRp, cacheRp, shortenerSv, logPublisherSv)
 	redirectURLUsecase := usecase.NewRedirectURLUsecase(cacheRp, urlRp)
 
 	// Handlers
